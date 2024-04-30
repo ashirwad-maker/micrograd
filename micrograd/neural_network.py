@@ -1,5 +1,5 @@
 import math
-from engine import Value
+from micrograd.engine import Value
 
 class Module:
     def zero_grad(self):
