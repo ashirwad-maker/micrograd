@@ -1,7 +1,8 @@
 class Value:
-    def __init__(self, value, _children = (), op=''):
+    def __init__(self, value, _children = (), _op=''):
         self.data = value
         self.grad = 0.0
+        self._op = _op
         self._prev = set(_children)
         self._backward = lambda : None 
     
@@ -17,6 +18,7 @@ class Value:
         return out
 
     def __mul__(self, other):
+        other = other if isinstance(other,Value) else Value(other)
         out = Value(self.data * other.data, (self, other),'*')
         
         def _backward():
