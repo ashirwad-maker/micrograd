@@ -1,34 +1,35 @@
-import math
+import numpy as np
 from micrograd.engine import Value
 
 class Module:
     def zero_grad(self):
-        for p in self.parameters:
+        for p in self.parameters():
             p.grad=0
 
-    def parameter(self):
+    def parameters(self):
         return []
     
 
 class Neuron(Module):
     def __init__(self, nin, nonLinear = True):
-        self.w = [Value(math.random(-1,1)) for _ in nin]
+        self.w = [Value(np.random.uniform(-1,1)) for _ in range(nin)]
         self.b = Value(0)
         self.nonLinear = nonLinear 
 
     def __call__(self, x):
-        act = sum((wi*xi for wi,xi in zip(self, x)),self.b)
+        act = sum((wi*xi for wi,xi in zip(self.w, x)),self.b)
         return act.relu() if self.nonLinear else act
     
     def parameters(self):
         return self.w + [self.b]
     
     def __repr__(self):
-        return f"{"ReLu" if self.nonLinear else "Linear"} Neuron({len(self.w)})"  
+        return f"{{'ReLu' if self.nonLinear else 'Linear'}}Neuron({len(self.w)})"
+  
     
 
 class Layer(Module):
-    def __init__(self,nin,nout,**kwargs):
+    def __init__(self,nin,nout):
         self.neuron = [Neuron(nin) for _ in range(nout)]
 
     def __call__(self,x):
@@ -45,10 +46,10 @@ class Layer(Module):
 class MLP(Module):
     def __init__(self, nin, nouts):
         sz = [nin] + nouts
-        self.layer = [Layer(sz[i],sz[i+1],nonlin=i!=len(nouts)-1) for i in range(len(nouts))]
+        self.layers = [Layer(sz[i],sz[i+1]) for i in range(len(nouts))]
 
     def __call__(self,x):
-        for layer in self.layer:
+        for layer in self.layers:
             x = layer(x)
         return x
     
@@ -56,4 +57,4 @@ class MLP(Module):
         return [p for layer in self.layers for p in layer.parameters()]
     
     def __repr__(self):
-        return f"MLP of [{', '.join(str(layer) for layer in self.layers)}]"
+        return f"MLP of [{', '.join(str(layer) for layer in self.layer)}]"
