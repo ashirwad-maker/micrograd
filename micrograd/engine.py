@@ -32,7 +32,7 @@ class Value:
     def __pow__(self, other):
         out = Value(self.data** other,(self,),'**')
         def _backward():
-            self.grad+= other*self.data**(other-1) * out.grad
+            self.grad+= other*(self.data**(other-1)) * out.grad
 
         out._backward = _backward
         return out
@@ -42,7 +42,7 @@ class Value:
         def _backward():
             self.grad += (1 if self.data>0 else 0) *out.grad
 
-        self._backward = _backward
+        out._backward = _backward
         return out
     
     def backward(self):
