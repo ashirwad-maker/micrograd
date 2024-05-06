@@ -1,7 +1,7 @@
 class Value:
     def __init__(self, value, _children = (), _op=''):
-        self.data = value
-        self.grad = 0.0
+        self.data = float(value)
+        self.grad = float(0.0)
         self._prev = set(_children)
         self._op = _op
         self._backward = lambda : None 
@@ -19,7 +19,7 @@ class Value:
 
     def __mul__(self, other):
         other = other if isinstance(other,Value) else Value(other)
-        out = Value(self.data * other.data, (self, other),'*')
+        out = Value(self.data * other.data, (self, other),'x')
         
         def _backward():
             self.grad += other.data * out.grad
@@ -30,7 +30,7 @@ class Value:
 
 
     def __pow__(self, other):
-        out = Value(self.data** other,(self,),'**')
+        out = Value(self.data** other,(self,),f'**{other}')
         def _backward():
             self.grad+= other*(self.data**(other-1)) * out.grad
 
@@ -38,9 +38,9 @@ class Value:
         return out
     
     def relu(self):
-        out = Value(0 if self.data<0 else self.data, (self,),"relu")
+        out = Value(0.0 if self.data<0 else self.data, (self,),"relu")
         def _backward():
-            self.grad += (1 if self.data>0 else 0) *out.grad
+            self.grad += (1.0 if self.data>0 else 0) *out.grad
 
         out._backward = _backward
         return out
@@ -62,7 +62,7 @@ class Value:
 
 
     def __neg__(self):
-        return self*-1
+        return self*-1.0
     
     def __radd__(self,other):
         return self + other
@@ -76,8 +76,8 @@ class Value:
     def __truediv__(self,other):
         return self * (other**-1)
     
-    def __rtruedeiv__(self, other):
-        return other * self**-1
+    def __rtruediv__(self, other):
+        return Value(other) * (self.data**-1)
 
     def __rmul__(self, other):
         return self * other
