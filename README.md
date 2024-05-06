@@ -1,1 +1,2 @@
 # micrograd
+![Micrograd](./micrograd.png)
